@@ -17,7 +17,7 @@
             box-sizing: border-box;
         }
         #chat-container, #rag-container {
-            width: 45%;
+            width: 30%;
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -144,6 +144,48 @@
     </div>
 
     <script>
+        function attachCollapsibleListeners() {
+            document.querySelectorAll('.collapsible').forEach(item => {
+                item.addEventListener('click', function() {
+                    this.classList.toggle('active');
+                    const content = this.nextElementSibling;
+                    if (content.style.display === "block") {
+                        content.style.display = "none";
+                    } else {
+                        content.style.display = "block";
+                    }
+                });
+            });
+        }
+
+        function attachDeleteNodeListeners() {
+            document.querySelectorAll('.delete-node').forEach(button => {
+                button.addEventListener('click', async function() {
+                    const index = this.getAttribute('data-index');
+                    try {
+                        const response = await fetch(`/delete_rag_node/${index}`, {
+                            method: 'DELETE'
+                        });
+                        const result = await response.json();
+                        if (result.status === 'success') {
+                            alert('Node deleted successfully!');
+                            this.parentElement.remove(); // Remove the node from the DOM
+                        } else {
+                            alert('Failed to delete node.');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting node:', error);
+                        alert('An error occurred while deleting the node.');
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            attachCollapsibleListeners();
+            attachDeleteNodeListeners();
+        });
+
         document.getElementById('chat-form').onsubmit = async function(event) {
             event.preventDefault();
             const inputField = this.querySelector('input[name="fund_name"]');
@@ -178,33 +220,35 @@
             chatHistory.appendChild(perplexityDiv);
 
             // Display RAG Data
-            const ragDataDiv = document.createElement('div');
-            ragDataDiv.className = 'message ai-message';
-            ragDataDiv.innerHTML = `<strong>RAG Data:</strong> ${data.rag_data.length > 100 ? data.rag_data.slice(0, 100) + '...' : data.rag_data}`;
-            chatHistory.appendChild(ragDataDiv);
+            data.rag_data.forEach((ragEntry, index) => {
+                const ragDataDiv = document.createElement('div');
+                ragDataDiv.className = 'message ai-message';
+                ragDataDiv.innerHTML = `<strong>RAG Data ${index + 1}:</strong> ${ragEntry.length > 100 ? ragEntry.slice(0, 100) + '...' : ragEntry}`;
+                chatHistory.appendChild(ragDataDiv);
 
-            if (data.rag_data.length > 100) {
-                const collapsibleButton = document.createElement('button');
-                collapsibleButton.textContent = 'Show More';
-                collapsibleButton.style.display = 'block';
-                collapsibleButton.style.marginTop = '5px';
-                ragDataDiv.appendChild(collapsibleButton);
+                if (ragEntry.length > 100) {
+                    const collapsibleButton = document.createElement('button');
+                    collapsibleButton.textContent = 'Show More';
+                    collapsibleButton.style.display = 'block';
+                    collapsibleButton.style.marginTop = '5px';
+                    ragDataDiv.appendChild(collapsibleButton);
 
-                const fullContentDiv = document.createElement('div');
-                fullContentDiv.style.display = 'none';
-                fullContentDiv.textContent = data.rag_data;
-                ragDataDiv.appendChild(fullContentDiv);
+                    const fullContentDiv = document.createElement('div');
+                    fullContentDiv.style.display = 'none';
+                    fullContentDiv.textContent = ragEntry;
+                    ragDataDiv.appendChild(fullContentDiv);
 
-                collapsibleButton.addEventListener('click', function() {
-                    if (fullContentDiv.style.display === 'none') {
-                        fullContentDiv.style.display = 'block';
-                        collapsibleButton.textContent = 'Show Less';
-                    } else {
-                        fullContentDiv.style.display = 'none';
-                        collapsibleButton.textContent = 'Show More';
-                    }
-                });
-            }
+                    collapsibleButton.addEventListener('click', function() {
+                        if (fullContentDiv.style.display === 'none') {
+                            fullContentDiv.style.display = 'block';
+                            collapsibleButton.textContent = 'Show Less';
+                        } else {
+                            fullContentDiv.style.display = 'none';
+                            collapsibleButton.textContent = 'Show More';
+                        }
+                    });
+                }
+            });
 
             // Display Summary
             const summaryDiv = document.createElement('div');
@@ -289,6 +333,8 @@
                 console.error('Error updating RAG data:', error);
                 alert('An error occurred while updating RAG data.');
             }
+            attachCollapsibleListeners();
+            attachDeleteNodeListeners();
         };
 
         document.getElementById('upload-pdf').onchange = async function(event) {
@@ -320,50 +366,14 @@
             }
         };
 
-        document.getElementById('fetch-url').onclick = function() {
-            const url = document.getElementById('url-input').value;
-            // Implement the logic to fetch data from URL and update RAG data
-        };
-
-        document.querySelectorAll('.collapsible').forEach(item => {
-            item.addEventListener('click', function() {
-                this.classList.toggle('active');
-                const content = this.nextElementSibling;
-                if (content.style.display === "block") {
-                    content.style.display = "none";
-                } else {
-                    content.style.display = "block";
-                }
-            });
-        });
-
-        document.querySelectorAll('.delete-node').forEach(button => {
-            button.addEventListener('click', async function() {
-                const index = this.getAttribute('data-index');
-                try {
-                    const response = await fetch(`/delete_rag_node/${index}`, {
-                        method: 'DELETE'
-                    });
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        alert('Node deleted successfully!');
-                        this.parentElement.remove(); // Remove the node from the DOM
-                    } else {
-                        alert('Failed to delete node.');
-                    }
-                } catch (error) {
-                    console.error('Error deleting node:', error);
-                    alert('An error occurred while deleting the node.');
-                }
-            });
-        });
-
         document.getElementById('clear-history').onclick = async function() {
             try {
+                console.log('Clear history button clicked'); // Debugging log
                 const response = await fetch('/clear_history', {
                     method: 'POST'
                 });
                 const result = await response.json();
+                console.log('Response from server:', result); // Debugging log
                 if (result.status === 'success') {
                     alert('Chat history cleared successfully!');
                     location.reload(); // Reload the page to update the chat history
