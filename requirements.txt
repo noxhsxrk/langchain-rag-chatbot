@@ -1,7 +1,10 @@
-flask==2.3.2
+flask==2.3.1
 requests==2.31.0
 python-dotenv==1.0.0
-langchain==0.3.17  # Replace with the actual version you are using
+langchain==0.3.17
 flask-session==0.4.0
 PyPDF2==3.0.1
 tiktoken==0.8.0
+elasticsearch
+langchain_community
+openai
