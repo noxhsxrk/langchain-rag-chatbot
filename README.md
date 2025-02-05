@@ -117,7 +117,9 @@ Create a `.env` file with the following variables:
 ```
 OPENAI_API_KEY=your_openai_api_key
 PERPLEXITY_API_KEY=your_perplexity_api_key
-ELASTICSEARCH_URL=your_elasticsearch_url
+ELASTICSEARCH_URL=https://localhost:53391
+ELASTICSEARCH_USERNAME=elastic
+ELASTICSEARCH_PASSWORD=xxxxx
 ```
 
 ## Contributing
