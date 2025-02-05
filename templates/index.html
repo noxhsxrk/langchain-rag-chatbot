@@ -185,7 +185,7 @@
                         const result = await response.json();
                         if (result.status === 'success') {
                             alert('Node deleted successfully!');
-                            this.parentElement.remove(); // Remove the node from the DOM
+                            this.parentElement.remove();
                         } else {
                             alert('Failed to delete node.');
                         }
@@ -198,7 +198,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Load chat history from local storage
             const savedChatHistory = localStorage.getItem('chatHistory');
             if (savedChatHistory) {
                 document.getElementById('chat-history').innerHTML = savedChatHistory;
@@ -273,7 +272,6 @@
             summaryDiv.innerHTML = `<strong>Summary:</strong> ${data.summary}`;
             chatHistory.appendChild(summaryDiv);
 
-            // Save updated chat history to local storage
             localStorage.setItem('chatHistory', chatHistory.innerHTML);
         };
 
@@ -386,16 +384,16 @@
 
         document.getElementById('clear-history').onclick = async function() {
             try {
-                console.log('Clear history button clicked'); // Debugging log
+                console.log('Clear history button clicked');
                 const response = await fetch('/clear_history', {
                     method: 'POST'
                 });
                 const result = await response.json();
-                console.log('Response from server:', result); // Debugging log
+                console.log('Response from server:', result);
                 if (result.status === 'success') {
                     alert('Chat history cleared successfully!');
-                    localStorage.removeItem('chatHistory'); // Remove chat history from local storage
-                    location.reload(); // Reload the page to update the chat history
+                    localStorage.removeItem('chatHistory');
+                    location.reload();
                 } else {
                     alert('Failed to clear chat history.');
                 }
@@ -436,7 +434,7 @@
 
                 const result = await response.json();
                 alert('Fund information retrieved successfully!');
-                location.reload(); // Refresh the browser
+                location.reload();
             } catch (error) {
                 console.error('Error searching fund information:', error);
                 alert('An error occurred while searching for fund information.');

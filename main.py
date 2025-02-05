@@ -42,12 +42,13 @@ def fetch_from_elasticsearch(index, query):
         print("Error fetching data from Elasticsearch:", str(e))
         return []
 
-# Step 1: Query Perplexity API
 def fetch_from_perplexity(fund_name):
     query = f"""Find latest information about mutual funds mentioned in this text: {fund_name}
     If there are multiple funds, provide separate analysis for each fund.
     Focus only on official fund information and recent performance.
-    Please response in thai language."""
+    Please response in thai language.
+    Please do not mention any other information.
+    """
     
     try:
         response = requests.post(
@@ -87,7 +88,6 @@ def fetch_from_perplexity(fund_name):
         return "", []
 
 
-# Step 2: Retrieve Relevant Data from RAG
 def fetch_from_rag():
     documents = []
     raw_texts = []
@@ -106,7 +106,6 @@ def fetch_from_rag():
     return raw_texts
 
 
-# Step 3: Merge and Summarize Data
 def summarize_data(citations, rag_data, fund_name, rag_mode):
     model = ChatOpenAI(model_name="gpt-4-turbo", openai_api_key=OPENAI_API_KEY)
     
@@ -179,7 +178,6 @@ def chat():
 def update_rag():
     new_rag_data = request.form.get('rag_data')
     if new_rag_data:
-        # Store new RAG data in session
         if 'rag_data' not in session:
             session['rag_data'] = []
         session['rag_data'].append(new_rag_data)
@@ -196,7 +194,6 @@ def upload_pdf():
     if file.filename == '':
         return jsonify({'status': 'failure', 'message': 'No selected file'})
     if file:
-        # Ensure the upload directory exists
         if not os.path.exists(app.config['UPLOAD_FOLDER']):
             os.makedirs(app.config['UPLOAD_FOLDER'])
 
@@ -204,7 +201,6 @@ def upload_pdf():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
         
-        # Read PDF and extract text
         try:
             with open(file_path, 'rb') as f:
                 reader = PyPDF2.PdfReader(f)
@@ -212,8 +208,7 @@ def upload_pdf():
                 for page in reader.pages:
                     text += page.extract_text()
             
-            # Optionally, update RAG data with extracted text
-            print("Extracted text from PDF:", text)  # Replace with actual update logic
+            print("Extracted text from PDF:", text)
             return jsonify({'status': 'success', 'text': text})
         except Exception as e:
             print("Error processing PDF:", str(e))
@@ -225,7 +220,7 @@ def fetch_url():
     try:
         response = urllib.request.urlopen(url)
         webContent = response.read().decode('utf-8')
-        # Update RAG data with web content
+
         return jsonify({'status': 'success', 'content': webContent})
     except Exception as e:
         return jsonify({'error': str(e)})
