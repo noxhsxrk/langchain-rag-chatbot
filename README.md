@@ -37,16 +37,7 @@ export PERPLEXITY_API_KEY="your-perplexity-key"
 
 ### Adding Data Sources
 
-1. **Text Files**:
-
-```python
-from langchain.document_loaders import TextLoader
-
-loader = TextLoader("data.txt")
-documents = loader.load()
-```
-
-2. **PDF Files**:
+1. **PDF Files**:
 
 ```python
 from langchain.document_loaders import PyPDFLoader
@@ -55,7 +46,7 @@ loader = PyPDFLoader("document.pdf")
 documents = loader.load()
 ```
 
-3. **Elasticsearch**:
+2. **Elasticsearch**:
 
 ```python
 from langchain.document_loaders import ElasticsearchLoader
