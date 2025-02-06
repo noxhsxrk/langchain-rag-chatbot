@@ -206,13 +206,19 @@ def fetch_perplexity_route():
 @app.route('/get_summary', methods=['POST'])
 def get_summary():
     data = request.get_json()
-    perplexity_data = data.get('perplexity_data')
     citations = data.get('citations')
+    model_name = data.get('model', 'gpt-4o-mini')
     rag_data = fetch_from_rag()
+
+    model_mapping = {
+        'gpt-4o': 'gpt-4-turbo',
+        'gpt-4o-mini': 'gpt-4',
+        'gpt-3.5-turbo': 'gpt-3.5-turbo'
+    }
 
     def generate():
         model = ChatOpenAI(
-            model_name="gpt-4-turbo",
+            model_name=model_mapping[model_name],
             openai_api_key=OPENAI_API_KEY,
             streaming=True
         )
@@ -221,7 +227,7 @@ def get_summary():
             I have gathered two sets of information:
             1. From Link citations: {citations}
             2. From my internal knowledge base (RAG): {rag_data}
-            Please summarize the information.
+            Please summarize the information from both sources.
             
             if citations is empty, please use only RAG data to summary.
             if citations is not empty, please use only citations to summary.

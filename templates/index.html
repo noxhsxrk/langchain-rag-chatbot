@@ -47,7 +47,7 @@
         .user-message {
             background-color: #007bff;
             color: white;
-            text-align: right;
+            text-align: left;
             float: right;
             clear: both;
         }
@@ -610,37 +610,44 @@
                 chatHistory.removeChild(searchingDiv);
                 const perplexityDiv = document.createElement('div');
                 perplexityDiv.className = 'message ai-message';
-                perplexityDiv.innerHTML = `<strong>ข้อมูลที่ค้นพบ:</strong> ${perplexityData.perplexity_data}`;
+                perplexityDiv.innerHTML = `<strong>ข้อมูลที่ค้นพบ (Perplexity):</strong> ${perplexityData.perplexity_data}`;
                 chatHistory.appendChild(perplexityDiv);
 
-                const summarizingDiv = document.createElement('div');
-                summarizingDiv.className = 'message ai-message thinking';
-                summarizingDiv.innerHTML = '<strong>AI:</strong> กำลังสรุปข้อมูลทั้งหมด...';
-                chatHistory.appendChild(summarizingDiv);
+                const models = ['gpt-4o', 'gpt-4o-mini', 'gpt-3.5-turbo'];
+                const summaryDivs = {};
 
-                const summaryResponse = await fetch('/get_summary', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        perplexity_data: perplexityData.perplexity_data,
-                        citations: perplexityData.citations
-                    })
-                });
+                for (const model of models) {
+                    const summarizingDiv = document.createElement('div');
+                    summarizingDiv.className = 'message ai-message thinking';
+                    summarizingDiv.innerHTML = `<strong>AI (${model}):</strong> กำลังสรุปข้อมูลทั้งหมด...`;
+                    chatHistory.appendChild(summarizingDiv);
 
-                const reader = summaryResponse.body.getReader();
-                const decoder = new TextDecoder();
-                const summaryDiv = document.createElement('div');
-                summaryDiv.className = 'message ai-message';
-                summaryDiv.innerHTML = '<strong>สรุป:</strong> ';
-                chatHistory.removeChild(summarizingDiv);
-                chatHistory.appendChild(summaryDiv);
+                    const summaryResponse = await fetch('/get_summary', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            perplexity_data: perplexityData.perplexity_data,
+                            citations: perplexityData.citations,
+                            model: model
+                        })
+                    });
 
-                while (true) {
-                    const {value, done} = await reader.read();
-                    if (done) break;
-                    const text = decoder.decode(value);
-                    summaryDiv.innerHTML += text;
-                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                    const reader = summaryResponse.body.getReader();
+                    const decoder = new TextDecoder();
+                    const summaryDiv = document.createElement('div');
+                    summaryDiv.className = 'message ai-message';
+                    summaryDiv.innerHTML = `<strong>สรุป (${model}):</strong> `;
+                    chatHistory.removeChild(summarizingDiv);
+                    chatHistory.appendChild(summaryDiv);
+                    summaryDivs[model] = summaryDiv;
+
+                    while (true) {
+                        const {value, done} = await reader.read();
+                        if (done) break;
+                        const text = decoder.decode(value);
+                        summaryDiv.innerHTML += text;
+                        chatHistory.scrollTop = chatHistory.scrollHeight;
+                    }
                 }
 
                 localStorage.setItem('chatHistory', chatHistory.innerHTML);
