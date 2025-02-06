@@ -8,9 +8,11 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;  /* Allow items to wrap */
             justify-content: center;
             align-items: flex-start;
-            height: 100vh;
+            min-height: 100vh;
             background-color: #f0f0f0;
             margin: 0;
             padding: 20px;
@@ -18,6 +20,7 @@
         }
         #chat-container, #rag-container {
             width: 30%;
+            min-width: 300px;
             background-color: white;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -25,7 +28,7 @@
             margin: 10px;
         }
         #chat-container {
-            height: 800px;
+            height: 80vh;
         }
         #chat-history {
             height: 700px;
@@ -66,19 +69,70 @@
             border-radius: 4px;
             margin-right: 10px;
         }
-        #chat-form button {
+        #chat-form button, #clear-history, #update-rag, #search-fund-info, #add-fund-code {
             padding: 10px 20px;
             background-color: #007bff;
             color: white;
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #chat-form button:hover, #clear-history:hover, #update-rag:hover, #search-fund-info:hover, #add-fund-code:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #clear-history {
+            margin: 10px;
+            background-color: #dc3545;
+            width: calc(100% - 20px);
+        }
+
+        #clear-history:hover {
+            background-color: #c82333;
+        }
+
+        .delete-node {
+            padding: 6px 12px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .delete-node:hover {
+            background-color: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .toggle-content {
+            padding: 6px 12px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 5px;
+        }
+
+        .toggle-content:hover {
+            background-color: #5a6268;
+            transform: translateY(-1px);
         }
         .thinking {
             font-style: italic;
             color: #888;
         }
         #rag-container {
+            padding-top: 50px;
             padding: 20px;
         }
         #rag-data-container {
@@ -107,55 +161,343 @@
             margin-bottom: 5px;
             background-color: #f9f9f9;
         }
+
+        @media screen and (max-width: 1200px) {
+            #chat-container, #rag-container {
+                width: 45%;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .main-content-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #chat-container, #rag-container {
+                width: 95%;
+                margin: 10px 0;
+            }
+
+            #user-manual-container {
+                width: 95%;
+                margin: 10px 0;
+            }
+
+            #chat-container {
+                height: 600px;
+            }
+
+            #chat-history {
+                height: 450px;
+            }
+
+            #chat-form {
+                flex-direction: column;
+            }
+
+            #chat-form input {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+
+            .message {
+                max-width: 90%;
+            }
+
+            #fund-code-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .fund-code-input {
+                width: 100%;
+                padding: 10px 12px;
+                font-size: 16px;
+            }
+
+            #add-fund-code, #search-fund-info {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            #rag-data {
+                width: calc(100% - 20px) !important;
+            }
+
+            .delete-node, .toggle-content {
+                padding: 8px;
+                margin: 5px;
+                width: calc(50% - 10px);
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            #chat-container, #rag-container {
+                width: 100%;
+                margin: 5px 0;
+            }
+
+            #chat-container {
+                height: 500px;
+            }
+
+            #chat-history {
+                height: 350px;
+            }
+
+            .message {
+                max-width: 95%;
+                padding: 8px;
+            }
+
+            #chat-form button, #clear-history, #update-rag, #search-fund-info, #add-fund-code {
+                padding: 8px 16px;
+            }
+        }
+
+        #chat-container, #rag-container, .message, #chat-form, #chat-form input, 
+        #chat-form button, .delete-node, .toggle-content {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .fund-code-input {
+            width: 50%;
+            padding: 12px 15px;
+            margin-bottom: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            color: #495057;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .fund-code-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+            background-color: #fff;
+        }
+
+        .fund-code-input::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        #fund-code-container {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fund-code-input:not(:first-child) {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        /* Fund code section title */
+        .fund-code-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* Fund code input container styling */
+        .fund-code-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .fund-code-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            color: #495057;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .delete-fund-code {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 18px;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .delete-fund-code:hover {
+            background-color: #c82333;
+            transform: scale(1.1);
+        }
+
+        /* Hide delete button for first input */
+        .fund-code-wrapper:first-child .delete-fund-code {
+            display: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .fund-code-wrapper {
+                flex-direction: row;
+                gap: 8px;
+            }
+
+            .delete-fund-code {
+                width: 35px;
+                height: 35px;
+                font-size: 20px;
+            }
+        }
+
+        /* Add this new style for the main content wrapper */
+        .main-content-wrapper {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            width: 100%;
+        }
+
+        #user-manual-container {
+            width: calc(60% + 20px);
+            margin: 20px auto;
+        }
     </style>
 </head>
 <body>
-    <div id="chat-container">
-        <div id="chat-history">
-            {% for entry in history %}
-                <div class="message user-message"><strong>You:</strong> {{ entry.fund_name }}</div>
-                <div class="message ai-message"><strong>Citation:</strong> {{ entry.citations }}</div>
-                <div class="message ai-message"><strong>Summary:</strong> {{ entry.summary }}</div>
-            {% endfor %}
+    <div class="main-content-wrapper">
+        <div id="chat-container">
+            <div id="chat-history">
+                {% for entry in history %}
+                    <div class="message user-message"><strong>You:</strong> {{ entry.fund_name }}</div>
+                    <div class="message ai-message"><strong>Citation:</strong> {{ entry.citations }}</div>
+                    <div class="message ai-message"><strong>Summary:</strong> {{ entry.summary }}</div>
+                {% endfor %}
+            </div>
+            <form id="chat-form" method="post">
+                <input type="text" name="fund_name" placeholder="Type your message..." required>
+                <button type="submit">Send</button>
+            </form>
+            <button id="clear-history">Clear Chat History</button>
         </div>
-        <form id="chat-form" method="post">
-            <input type="text" name="fund_name" placeholder="Type your message..." required>
-            <label>
-                <input type="checkbox" name="rag_mode" id="rag-mode-checkbox"> RAG Mode
-            </label>
-            <button type="submit">Send</button>
-        </form>
-        <button id="clear-history">Clear Chat History</button>
+
+        <div id="rag-container">
+            <h3>RAG Data</h3>
+            <textarea id="rag-data" rows="10" style="width: 100%;"></textarea>
+            <button id="update-rag">Update RAG Data</button>
+            <input type="file" id="upload-pdf" accept="application/pdf">
+
+            <div class="fund-code-title">Search Fund Information</div>
+            <div id="fund-code-container">
+                <div class="fund-code-wrapper">
+                    <input type="text" 
+                           name="fund_code" 
+                           placeholder="Enter fund code (e.g., SCBSET50)" 
+                           class="fund-code-input" 
+                           autocomplete="off">
+                    <button type="button" class="delete-fund-code" title="Remove fund code">&times;</button>
+                </div>
+            </div>
+            <button id="add-fund-code">+ Add Another Fund Code</button>
+            <button id="search-fund-info">Search Fund Information</button>
+
+            <div id="rag-data-container">
+                <h4>Stored RAG Nodes</h4>
+                <ul id="rag-nodes-list">
+                    {% if session['rag_data'] %}
+                        {% for node in session['rag_data'] %}
+                            <li>
+                                <div class="content" style="display: none;">{{ node }}</div>
+                                <button class="toggle-content">Show More</button>
+                                <button class="delete-node" data-index="{{ loop.index0 }}">Delete</button>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <p id="no-rag-data-message">No RAG data stored.</p>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
     </div>
 
-    <div id="rag-container">
-        <h3>RAG Data</h3>
-        <textarea id="rag-data" rows="10" style="width: 100%;"></textarea>
-        <button id="update-rag">Update RAG Data</button>
-        <input type="file" id="upload-pdf" accept="application/pdf">
+    <div id="user-manual-container">
+        <div id="user-manual" style="padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <h3 style="color: #2c3e50; border-bottom: 2px solid #e9ecef; padding-bottom: 10px;">User Manual</h3>
+            
+            <div style="margin-top: 15px;">
+                <h4 style="color: #3498db;">Chat Features</h4>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 10px;">1. Type your question the chat input field</li>
+                    <li style="margin-bottom: 10px;">2. Click 'Send' or press Enter to submit your question</li>
+                    <li style="margin-bottom: 10px;">3. Use 'Clear Chat History' to remove all previous conversations</li>
+                </ul>
 
-        <h4>Search Fund Information</h4>
-        <div id="fund-code-container">
-            <input type="text" name="fund_code" placeholder="Enter fund code" class="fund-code-input">
-        </div>
-        <button id="add-fund-code">Add Another Fund Code</button>
-        <button id="search-fund-info">Search Fund Information</button>
+                <h4 style="color: #3498db; margin-top: 20px;">RAG Data Management</h4>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 10px;">There are 2 ways to add data to RAG:</li>
+                    <li style="margin-left: 20px; margin-bottom: 15px;">
+                        <strong>1. Manual Input:</strong>
+                        <ul style="list-style-type: none; padding-left: 20px;">
+                            <li>• Type or paste your data directly in the RAG Data textarea</li>
+                            <li>• Click 'Update RAG Data' to add it to RAG Nodes</li>
+                        </ul>
+                    </li>
+                    <li style="margin-left: 20px; margin-bottom: 15px;">
+                        <strong>2. PDF Upload:</strong>
+                        <ul style="list-style-type: none; padding-left: 20px;">
+                            <li>• Click 'Choose File' and select your PDF</li>
+                            <li>• The PDF content will appear in the RAG Data textarea</li>
+                            <li>• Click 'Update RAG Data' to add it to RAG Nodes</li>
+                        </ul>
+                    </li>
+                    <li style="margin-bottom: 10px;">You can view and manage all stored RAG nodes in the list below</li>
+                </ul>
 
-        <div id="rag-data-container">
-            <h4>Stored RAG Nodes</h4>
-            <ul id="rag-nodes-list">
-                {% if session['rag_data'] %}
-                    {% for node in session['rag_data'] %}
-                        <li>
-                            <div class="content" style="display: none;">{{ node }}</div>
-                            <button class="toggle-content">Show More</button>
-                            <button class="delete-node" data-index="{{ loop.index0 }}">Delete</button>
-                        </li>
-                    {% endfor %}
-                {% else %}
-                    <p id="no-rag-data-message">No RAG data stored.</p>
-                {% endif %}
-            </ul>
+                <h4 style="color: #3498db; margin-top: 20px;">Fund Information Search</h4>
+                <ul style="list-style-type: none; padding-left: 0;">
+                    <li style="margin-bottom: 10px;">1. Enter fund codes in the provided input fields</li>
+                    <li style="margin-bottom: 10px;">2. Add more fund codes using '+ Add Another Fund Code' button</li>
+                    <li style="margin-bottom: 10px;">3. Remove unwanted fund codes using the '×' button</li>
+                    <li style="margin-bottom: 10px;">4. Click 'Search Fund Information' to retrieve data</li>
+                    <li style="margin-bottom: 10px;">5. The data will appear in the rag node below</li>
+                </ul>
+            </div>
         </div>
     </div>
 
@@ -180,18 +522,39 @@
                     const index = this.getAttribute('data-index');
                     try {
                         const response = await fetch(`/delete_rag_node/${index}`, {
-                            method: 'DELETE'
+                            method: 'DELETE',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
                         });
+                        
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        
                         const result = await response.json();
                         if (result.status === 'success') {
-                            alert('Node deleted successfully!');
                             this.parentElement.remove();
+                            
+                            const remainingNodes = document.querySelectorAll('#rag-nodes-list .delete-node');
+                            remainingNodes.forEach((node, idx) => {
+                                node.setAttribute('data-index', idx);
+                            });
+                            
+                            const ragNodesList = document.getElementById('rag-nodes-list');
+                            if (ragNodesList.children.length === 0) {
+                                const noDataMessage = document.createElement('p');
+                                noDataMessage.id = 'no-rag-data-message';
+                                noDataMessage.textContent = 'No RAG data stored.';
+                                ragNodesList.appendChild(noDataMessage);
+                            }
                         } else {
-                            alert('Failed to delete node.');
+                            alert('Failed to delete node: ' + (result.message || 'Unknown error'));
                         }
                     } catch (error) {
                         console.error('Error deleting node:', error);
-                        alert('An error occurred while deleting the node.');
+                        alert('An error occurred while deleting the node. Please try again.');
                     }
                 });
             });
@@ -228,51 +591,67 @@
 
             chatHistory.innerHTML += `<div class="message user-message"><strong>You:</strong> ${userMessage}</div>`;
             chatHistory.scrollTop = chatHistory.scrollHeight;
-
             inputField.value = '';
 
-            const thinkingDiv = document.createElement('div');
-            thinkingDiv.className = 'message ai-message thinking';
-            thinkingDiv.innerHTML = '<strong>AI is thinking...</strong>';
-            chatHistory.appendChild(thinkingDiv);
+            const searchingDiv = document.createElement('div');
+            searchingDiv.className = 'message ai-message thinking';
+            searchingDiv.innerHTML = '<strong>AI:</strong> กำลังค้นหาข้อมูลจาก Perplexity...';
+            chatHistory.appendChild(searchingDiv);
             chatHistory.scrollTop = chatHistory.scrollHeight;
 
-            const formData = new FormData();
-            formData.append('fund_name', userMessage);
-            const ragMode = document.getElementById('rag-mode-checkbox').checked;
-            formData.append('rag_mode', ragMode);
-            const response = await fetch('/', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            chatHistory.removeChild(thinkingDiv);
-
-            if (data.citations && data.citations.length > 0) {
-                const citationsDiv = document.createElement('div');
-                citationsDiv.className = 'message ai-message';
-                citationsDiv.innerHTML = '<strong>Citations:</strong>';
-                data.citations.forEach(citation => {
-                    const citationBox = document.createElement('div');
-                    citationBox.className = 'citation-box';
-                    
-                    const citationLink = document.createElement('a');
-                    citationLink.href = citation;
-                    citationLink.target = '_blank';
-                    citationLink.textContent = citation;
-                    
-                    citationBox.appendChild(citationLink);
-                    citationsDiv.appendChild(citationBox);
+            try {
+                const perplexityResponse = await fetch('/fetch_perplexity', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fund_name: userMessage })
                 });
-                chatHistory.appendChild(citationsDiv);
+                const perplexityData = await perplexityResponse.json();
+
+                chatHistory.removeChild(searchingDiv);
+                const perplexityDiv = document.createElement('div');
+                perplexityDiv.className = 'message ai-message';
+                perplexityDiv.innerHTML = `<strong>ข้อมูลที่ค้นพบ:</strong> ${perplexityData.perplexity_data}`;
+                chatHistory.appendChild(perplexityDiv);
+
+                const summarizingDiv = document.createElement('div');
+                summarizingDiv.className = 'message ai-message thinking';
+                summarizingDiv.innerHTML = '<strong>AI:</strong> กำลังสรุปข้อมูลทั้งหมด...';
+                chatHistory.appendChild(summarizingDiv);
+
+                const summaryResponse = await fetch('/get_summary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        perplexity_data: perplexityData.perplexity_data,
+                        citations: perplexityData.citations
+                    })
+                });
+
+                const reader = summaryResponse.body.getReader();
+                const decoder = new TextDecoder();
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'message ai-message';
+                summaryDiv.innerHTML = '<strong>สรุป:</strong> ';
+                chatHistory.removeChild(summarizingDiv);
+                chatHistory.appendChild(summaryDiv);
+
+                while (true) {
+                    const {value, done} = await reader.read();
+                    if (done) break;
+                    const text = decoder.decode(value);
+                    summaryDiv.innerHTML += text;
+                    chatHistory.scrollTop = chatHistory.scrollHeight;
+                }
+
+                localStorage.setItem('chatHistory', chatHistory.innerHTML);
+            } catch (error) {
+                console.error('Error:', error);
+                chatHistory.removeChild(searchingDiv);
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'message ai-message';
+                errorDiv.innerHTML = '<strong>Error:</strong> เกิดข้อผิดพลาดในการประมวลผล';
+                chatHistory.appendChild(errorDiv);
             }
-
-            const summaryDiv = document.createElement('div');
-            summaryDiv.className = 'message ai-message';
-            summaryDiv.innerHTML = `<strong>Summary:</strong> ${data.summary}`;
-            chatHistory.appendChild(summaryDiv);
-
-            localStorage.setItem('chatHistory', chatHistory.innerHTML);
         };
 
         document.querySelector('input[name="fund_name"]').addEventListener('keypress', function(event) {
@@ -296,6 +675,7 @@
                 const result = await response.json();
                 if (result.status === 'success') {
                     alert('RAG data updated successfully!');
+                    document.getElementById('rag-data').value = '';
                     
                     const noDataMessage = document.getElementById('no-rag-data-message');
                     if (noDataMessage) {
@@ -308,7 +688,7 @@
                         <div class="collapsible">${ragData.slice(0, 30)}${ragData.length > 30 ? '...' : ''}</div>
                         <div class="content">${ragData}</div>
                         <button class="toggle-content">Show More</button>
-                        <button class="delete-node" data-index="${ragNodesList.children.length-1}">Delete</button>
+                        <button class="delete-node" data-index="${ragNodesList.children.length}">Delete</button>
                     `;
                     ragNodesList.appendChild(newNode);
 
@@ -321,7 +701,7 @@
                             const result = await response.json();
                             if (result.status === 'success') {
                                 alert('Node deleted successfully!');
-                                this.parentElement.remove(); // Remove the node from the DOM
+                                this.parentElement.remove();
                             } else {
                                 alert('Failed to delete node.');
                             }
@@ -405,12 +785,27 @@
 
         document.getElementById('add-fund-code').onclick = function() {
             const container = document.getElementById('fund-code-container');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'fund-code-wrapper';
+            
             const input = document.createElement('input');
             input.type = 'text';
             input.name = 'fund_code';
             input.placeholder = 'Enter fund code';
             input.className = 'fund-code-input';
-            container.appendChild(input);
+            
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.className = 'delete-fund-code';
+            deleteButton.title = 'Remove fund code';
+            deleteButton.innerHTML = '&times;';
+            deleteButton.onclick = function() {
+                wrapper.remove();
+            };
+            
+            wrapper.appendChild(input);
+            wrapper.appendChild(deleteButton);
+            container.appendChild(wrapper);
         };
 
         document.getElementById('search-fund-info').onclick = async function() {
@@ -433,6 +828,22 @@
                 });
 
                 const result = await response.json();
+                
+                if (result.status !== 'success') {
+                    alert('Failed to fetch fund information.');
+                    return;
+                }
+
+                const foundFundCodes = result.results.map(fund => fund._source.code);
+                const notFoundFundCodes = fundCodes.filter(code => 
+                    !foundFundCodes.some(foundCode => foundCode.toLowerCase() === code.toLowerCase())
+                );
+
+                if (notFoundFundCodes.length > 0) {
+                    alert(`Fund information not found for: ${notFoundFundCodes.join(', ')}`);
+                    return;
+                }
+
                 alert('Fund information retrieved successfully!');
                 location.reload();
             } catch (error) {
@@ -440,6 +851,16 @@
                 alert('An error occurred while searching for fund information.');
             }
         };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.delete-fund-code').forEach(button => {
+                button.onclick = function() {
+                    if (this.parentElement.parentElement.children.length > 1) {
+                        this.parentElement.remove();
+                    }
+                };
+            });
+        });
     </script>
 </body>
 </html>

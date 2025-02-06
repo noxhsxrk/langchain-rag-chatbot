@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, session
+from flask import Flask, request, jsonify, render_template, session, Response, stream_with_context
 import os
 import requests
 from dotenv import load_dotenv
@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 import PyPDF2
 import urllib.request
 from elasticsearch import Elasticsearch
+import time
 
 app = Flask(__name__)
 
@@ -43,26 +44,17 @@ def fetch_from_elasticsearch(index, query):
         return []
 
 def fetch_from_perplexity(fund_name):
-    query = f"""Find latest information about mutual funds mentioned in this text: {fund_name}
-    If there are multiple funds, provide separate analysis for each fund.
-    Focus only on official fund information and recent performance.
-    Please response in thai language.
-    Please do not mention any other information.
-    """
-    
+    query = f"find raw data about {fund_name}"
     try:
         response = requests.post(
             "https://api.perplexity.ai/chat/completions",
             json={
                 "model": "sonar-pro",
                 "messages": [
-                    {"role": "system", "content": "You are a financial analyst. Extract fund codes from user input and provide analysis for each fund separately. Focus on official and verified sources."},
                     {"role": "user", "content": query}
                 ],
                 "max_tokens": 1000,
-                "temperature": 0.2,
                 "top_p": 0.9,
-                "search_domain_filter": ["news", "finance"],
                 "return_images": False,
                 "return_related_questions": False,
                 "stream": False,
@@ -105,74 +97,9 @@ def fetch_from_rag():
 
     return raw_texts
 
-
-def summarize_data(citations, rag_data, fund_name, rag_mode):
-    model = ChatOpenAI(model_name="gpt-4-turbo", openai_api_key=OPENAI_API_KEY)
-    
-    if rag_mode:
-        summary_prompt = f"""
-        I have gathered two sets of information about the mutual fund '{fund_name}':
-        1. From Link citations: {citations}
-        2. From my internal knowledge base (RAG): {rag_data}
-        
-        Please compare the funds using the provided citations and RAG data then tell me the pros and cons of each fund and give me the best fund to invest in.
-        And provide the citations for each fund.
-        Please response in thai language.
-        
-        for example:
-        Fund 1: // pros and cons
-        [citation1, citation2, citation3]
-        Fund 2: // pros and cons
-        [citation4, citation5, citation6]
-        """
-    else:
-        summary_prompt = f"""
-        I have gathered a set of information about the mutual fund '{fund_name}':
-        1. From Link citations: {citations}
-        
-        Please compare the funds using the provided citations and tell me the pros and cons of each fund and give me the best fund to invest in.
-        And provide the citations for each fund.
-        Please response in thai language.
-        
-        for example:
-        Fund 1: // pros and cons
-        [citation1, citation2, citation3]
-        Fund 2: // pros and cons
-        [citation4, citation5, citation6]
-        """
-    
-    return model.predict(summary_prompt)
-
-
 @app.route('/', methods=['GET', 'POST'])
 def chat():
-    if 'history' not in session:
-        session['history'] = []
-
-    if request.method == 'POST':
-        fund_name = request.form.get('fund_name')
-        perplexity_data, citations = fetch_from_perplexity(fund_name)
-        rag_data = fetch_from_rag()
-        summary = summarize_data(citations, rag_data, fund_name, request.form.get('rag_mode') == 'true')
-        
-        session['history'].append({
-            'fund_name': fund_name,
-            'perplexity_data': perplexity_data,
-            'rag_data': rag_data,
-            'citations': citations,
-            'summary': summary
-        })
-        session.modified = True
-        
-        return jsonify({
-            'perplexity_data': perplexity_data,
-            'summary': summary,
-            'rag_data': rag_data,
-            'citations': citations,
-            'history': session['history']
-        })
-    
-    return render_template('./index.html', history=session.get('history', []))
+    return render_template('./index.html')
 
 @app.route('/update_rag', methods=['POST'])
 def update_rag():
@@ -265,6 +192,48 @@ def search_elasticsearch():
     session.modified = True
 
     return jsonify({'status': 'success', 'results': results})
+
+@app.route('/fetch_perplexity', methods=['POST'])
+def fetch_perplexity_route():
+    data = request.get_json()
+    fund_name = data.get('fund_name')
+    perplexity_data, citations = fetch_from_perplexity(fund_name)
+    return jsonify({
+        'perplexity_data': perplexity_data,
+        'citations': citations
+    })
+
+@app.route('/get_summary', methods=['POST'])
+def get_summary():
+    data = request.get_json()
+    perplexity_data = data.get('perplexity_data')
+    citations = data.get('citations')
+    rag_data = fetch_from_rag()
+
+    def generate():
+        model = ChatOpenAI(
+            model_name="gpt-4-turbo",
+            openai_api_key=OPENAI_API_KEY,
+            streaming=True
+        )
+        
+        summary_prompt = f"""
+            I have gathered two sets of information:
+            1. From Link citations: {citations}
+            2. From my internal knowledge base (RAG): {rag_data}
+            Please summarize the information.
+            
+            if citations is empty, please use only RAG data to summary.
+            if citations is not empty, please use only citations to summary.
+
+            Please response in thai language.
+        """
+        
+        for chunk in model.stream(summary_prompt):
+            yield chunk.content
+            time.sleep(0.005)
+
+    return Response(stream_with_context(generate()), content_type='text/plain')
 
 if __name__ == "__main__":
     app.run(debug=True)
